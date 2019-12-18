@@ -1,11 +1,14 @@
 #!pip install --upgrade tensorflow
+#!pip install --upgrade pip setuptools wheel
+#!pip install -I tensorflow
+#!pip install -I keras
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Flatten, Activation, Dense, Dropout
 from keras.preprocessing.image import ImageDataGenerator
 from keras import backend as k
 from google.colab import drive
-drive.mount('/content/gdrive')
+#drive.mount('/content/gdrive')
 #mport matplotlib.pyplot as plt
 #import matplotlib.image as mpimg
 #img=mpimg.imread('./gdrive/My Drive/dataset/atm/IMG_20191217_183620_1.jpg')
@@ -14,35 +17,39 @@ drive.mount('/content/gdrive')
 
 
 #Note = image need to be rescaled to low resolution for training.
-image_width = 4000
-image_height = 3000
-img_shape = (image_width, image_height, 3)
+image_width = 260
+image_height = 163
+img_shape = (image_width, image_height, 1)
 
 
 
 
 model = Sequential()
-model.add(Conv2D(32, (2,2), input_shape = img_shape))
+model.add(Conv2D(32, (3,3), input_shape = img_shape))
 model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size = (2,2)))
+model.add(MaxPooling2D(pool_size = (2, 2)))
 
-model.add(Conv2D(32, (2,2)))
+model.add(Conv2D(32, (3,3)))
 model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size = (2,2)))
+model.add(MaxPooling2D(pool_size = (2, 2)))
 
-model.add(Conv2D(32, (2,2)))
+model.add(Conv2D(64, (3, 3)))
 model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size = (2,2)))
+model.add(MaxPooling2D(pool_size = (2, 2)))
+
+model.add(Conv2D(64, (3, 3)))
+model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size = (2, 2)))
 
 model.add(Flatten())
 model.add(Dense(64))
 model.add(Activation('relu'))
 model.add(Dropout(0.5))
-model.add(Dense(1))
-model.add(Activation('sigmoid'))
+model.add(Dense(3))
+model.add(Activation('softmax'))
 
 
-model.compile(loss='binary_crossentropy', 
+model.compile(loss='categorical_crossentropy', 
 			optimizer='rmsprop', 
 			metrics=['accuracy']) 
 
@@ -55,23 +62,25 @@ train_datagen = ImageDataGenerator(
 test_datagen = ImageDataGenerator(rescale=1./255)
 
 train_generator = train_datagen.flow_from_directory(
-        './gdrive/My Drive/dataset/train/',
+        '/content/gdrive/My Drive/dataset/New/Train/',
         target_size=(image_width, image_height),
-        batch_size=32,
-        class_mode='binary')
+        color_mode='grayscale',
+        batch_size=45,
+        class_mode='categorical')
 
 validation_generator = test_datagen.flow_from_directory(
-        './gdrive/My Drive/dataset/validation/',
+        '/content/gdrive/My Drive/dataset/New/validation/',
         target_size=(image_width, image_height),
-        batch_size=32,
-        class_mode='binary')
+        batch_size=45,
+        color_mode='grayscale',
+        class_mode='categorical')
 
 model.fit_generator(
         train_generator,
-        steps_per_epoch=80,
-        epochs=10,
+        steps_per_epoch=32,
+        epochs=12,
         validation_data=validation_generator,
-        validation_steps=40)
+        validation_steps=32)
 
 
-model.save_weights('model_saved.h5')
+model.save('model_multi_class_final.h5')
