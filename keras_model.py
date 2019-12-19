@@ -9,6 +9,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras import backend as k
 from google.colab import drive
 #drive.mount('/content/gdrive')
+import json
 #mport matplotlib.pyplot as plt
 #import matplotlib.image as mpimg
 #img=mpimg.imread('./gdrive/My Drive/dataset/atm/IMG_20191217_183620_1.jpg')
@@ -67,6 +68,10 @@ train_generator = train_datagen.flow_from_directory(
         color_mode='grayscale',
         batch_size=45,
         class_mode='categorical')
+
+
+jfile = open('class_indices.txt','w',encoding='utf-8')
+json.dump(train_generator.class_indices, jfile)
 
 validation_generator = test_datagen.flow_from_directory(
         '/content/gdrive/My Drive/dataset/New/validation/',
